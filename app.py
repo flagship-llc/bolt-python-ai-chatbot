@@ -1,25 +1,45 @@
+from dotenv import load_dotenv
 import os
-import logging
-from flask import Flask
-from slack_bolt import App
-from slack_bolt.adapter.flask import SlackRequestHandler
-from listeners import register_listeners
 
-# Initialize Flask and Slack Bolt apps
-flask_app = Flask(__name__)
-slack_app = App(token=os.environ.get("SLACK_BOT_TOKEN"))
-handler = SlackRequestHandler(slack_app)
-
+# Load environment variables from .env file
+load_dotenv()
 # Configure logging
+import logging
 logging.basicConfig(level=logging.DEBUG)
 
+# Verify environment variables are set
+signing_secret = os.environ.get("SLACK_SIGNING_SECRET")
+bot_token = os.environ.get("SLACK_BOT_TOKEN")
+
+if not signing_secret or not bot_token:
+    logging.error("Missing required environment variables SLACK_SIGNING_SECRET or SLACK_BOT_TOKEN")
+    raise ValueError("Missing required environment variables")
+
+
+from slack_bolt import App
+app = App(
+    signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
+    token=os.environ.get("SLACK_BOT_TOKEN")
+)
+
 # Register Slack Listeners
-register_listeners(slack_app)
+from listeners import register_listeners
+register_listeners(app)
+
+# Initialize Flask app
+from flask import Flask, request
+flask_app = Flask(__name__)
+
+# SlackRequestHandler translates WSGI requests to Bolt's interface
+# and builds WSGI response from Bolt's response.
+from slack_bolt.adapter.flask import SlackRequestHandler
+handler = SlackRequestHandler(app)
 
 # Create Flask route for Slack events
 @flask_app.route("/slack/events", methods=["POST"])
 def slack_events():
-    return handler.handle(flask_app.request)
+    # handler runs App's dispatch method
+    return handler.handle(request)
 
 # Start Flask app
 if __name__ == "__main__":
