@@ -3,7 +3,7 @@ from typing import List, Optional
 from state_store.get_user_state import get_user_state
 
 from ..ai_constants import DEFAULT_SYSTEM_CONTENT
-from .anthropic import AnthropicAPI
+#from .anthropic import AnthropicAPI
 from .openai import OpenAI_API
 from .vertexai import VertexAPI
 
@@ -25,16 +25,16 @@ isn't in the channel where the command is run.
 
 def get_available_providers():
     return {
-        **AnthropicAPI().get_models(),
+        #**AnthropicAPI().get_models(),
         **OpenAI_API().get_models(),
         **VertexAPI().get_models(),
     }
 
 
 def _get_provider(provider_name: str):
-    if provider_name.lower() == "anthropic":
-        return AnthropicAPI()
-    elif provider_name.lower() == "openai":
+    #if provider_name.lower() == "anthropic":
+    #    return AnthropicAPI()
+    if provider_name.lower() == "openai":
         return OpenAI_API()
     elif provider_name.lower() == "vertexai":
         return VertexAPI()
