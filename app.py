@@ -7,15 +7,6 @@ load_dotenv()
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-# Verify environment variables are set
-signing_secret = os.environ.get("SLACK_SIGNING_SECRET")
-bot_token = os.environ.get("SLACK_BOT_TOKEN")
-
-if not signing_secret or not bot_token:
-    logging.error("Missing required environment variables SLACK_SIGNING_SECRET or SLACK_BOT_TOKEN")
-    raise ValueError("Missing required environment variables")
-
-
 from slack_bolt import App
 app = App(
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
